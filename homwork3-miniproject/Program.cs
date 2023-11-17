@@ -24,9 +24,9 @@ while (true)
 
         // to print list of all pruduct 
         case "p":
-            Console.WriteLine("=============== list sorted by Type =======================================");
+           /* Console.WriteLine("=============== list sorted by Type ======================================="); 
             Console.WriteLine("                                                                            ");
-            productList.Print();
+            productList.Print();*/
             Console.WriteLine("============== List sorted by office and then by Purchase Date =============");
             Console.WriteLine("                                                                            ");
             productList.PrintByDate();
@@ -36,7 +36,7 @@ while (true)
             // to close the program 
         case "exit":
             Console.WriteLine("----------------------------------------------");
-            Console.WriteLine("          End of the Program      ");
+            Console.WriteLine("                 The End                 ");
             Console.WriteLine("----------------------------------------------");
             return;
 
@@ -62,7 +62,7 @@ class Asset
     public decimal LocalPrice;
     
     // constractor for Asset class
-    public Asset(string type, string brand, string model, DateTime purchaseDate, decimal price, string office, decimal localPrice, string currency)
+    public Asset(string type, string brand, string model, string office, DateTime purchaseDate, decimal price, string currency, decimal localPrice)
     {
         Type = type;
         Brand = brand;
@@ -93,6 +93,7 @@ class ProductList
         string type = Console.ReadLine();
         if (type != "phone" && type != "computer")
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("You entered an invalid type");
             return; // Exit the method if the type is invalid
         }
@@ -101,27 +102,31 @@ class ProductList
         string brand = Console.ReadLine();
         Console.Write(" Enter a Brand: ");
         string model = Console.ReadLine();
+        Console.Write(" Enter a Office: USA | Spain | Sweden:   "); // input choice from three office
+        string office = Console.ReadLine().ToUpper();
+        if (office != "USA" && office != "SPAIN" && office != "SWEDEN")
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("You entered an invalid type");
+            return; // Exit the method if the office is invalid
+        }
         Console.Write(" Enter a Purchase Date (yyyy-MM-dd): ");
 
         
         if (!DateTime.TryParse(Console.ReadLine(), out DateTime purchaseDate))
         {
+            Console.ForegroundColor = ConsoleColor.Red; 
             Console.WriteLine(" Invalid Date format");// Exit the method if the date is invalid
-
+            return;
         }
         Console.Write(" Price in dollars: ");
         if (!decimal.TryParse(Console.ReadLine(), out decimal price))
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(" Invalid Price "); // Exit the method if the price is invalid 
+            return;
         }
 
-        Console.Write(" Enter a Office: USA | Spain | Sweden:   "); // input choice from three office
-        string office = Console.ReadLine().ToUpper();    
-        if (office != "USA" && office != "SPAIN" && office != "SWEDEN")
-        {
-            Console.WriteLine("You entered an invalid type");
-            return; // Exit the method if the office is invalid
-        }
 
         GetPrice convertPrice = new GetPrice(price,office);  // create object from class GEtPrice
 
@@ -129,7 +134,7 @@ class ProductList
         decimal localPrice= convertPrice.PriceInDollar(); // Get value of Local price 
 
       // add values in the list inside object Asset
-        AssetList.Add(new Asset(type, brand, model, purchaseDate, price,office, localPrice, currency));
+        AssetList.Add(new Asset(type, brand, model, office,purchaseDate, price, currency, localPrice));
     }
 
     public virtual void Print()
@@ -137,10 +142,13 @@ class ProductList
 
         // Sort the list by Type and print
         List<Asset> SortedProducts = AssetList.OrderBy(Asset => Asset.Type).ToList();
-        Console.WriteLine("Type".PadRight(15) + "Brand".PadRight(15) + "Model".PadRight(15) + "PurchaseDate".PadRight(15) + "Price".PadRight(15)  + "Office".PadRight(15) + "LocalPrice".PadRight(15) + "Currency".PadRight(15));
+        
+       Console.WriteLine("Type".PadRight(15) + "Brand".PadRight(15) + "Model".PadRight(15) + "Office".PadRight(15) + "PurchaseDate".PadRight(15) + "Price".PadRight(15) + "Currency".PadRight(15) + "LocalPrice".PadRight(15) );
+        Console.WriteLine("--------".PadRight(15) + "------".PadRight(15) + "-----".PadRight(15) + "------".PadRight(15) + "-------------".PadRight(15) + "-------".PadRight(15) + "---------".PadRight(15) + "----------".PadRight(15));
+
         foreach (Asset ass in SortedProducts)
         {
-            Console.WriteLine(ass.Type.PadRight(15)  + ass.Brand.PadRight(15) + ass.Model.PadRight(15) + ass.PurchaseDate.ToString("yyyy-MM-dd").PadRight(15) + ass.Price.ToString().PadRight(15) + ass.Office.PadRight(15) + ass.LocalPrice.ToString().PadRight(15) + ass.Currency.PadRight(15)  );
+            Console.WriteLine(ass.Type.PadRight(15)  + ass.Brand.PadRight(15) + ass.Model.PadRight(15) + ass.Office.PadRight(15) + ass.PurchaseDate.ToString("yyyy-MM-dd").PadRight(15) + ass.Price.ToString().PadRight(15) + ass.Currency.PadRight(15) + ass.LocalPrice.ToString().PadRight(15) );
              
         }
     }
@@ -150,7 +158,8 @@ class ProductList
 
         // Sort the list by Office first and then by Purchase Date
         List<Asset> SortedProducts1 = AssetList.OrderBy(asset => asset.Office).ThenBy(asset => asset.PurchaseDate).ToList();
-        Console.WriteLine("Type".PadRight(15) + "Brand".PadRight(15) + "Model".PadRight(15) + "PurchaseDate".PadRight(15) + "Price".PadRight(15) + "Office".PadRight(15) + "LocalPrice".PadRight(15) + "Currency".PadRight(15));
+        Console.WriteLine("Type".PadRight(15) + "Brand".PadRight(15) + "Model".PadRight(15)  +"Office".PadRight(15) + "PurchaseDate".PadRight(15) + "Price".PadRight(15)  + "Currency".PadRight(15) + "LocalPrice".PadRight(15) );
+        Console.WriteLine("--------".PadRight(15) + "------".PadRight(15) + "-----".PadRight(15) + "------".PadRight(15) + "-------------".PadRight(15) + "-------".PadRight(15) + "---------".PadRight(15) + "----------".PadRight(15));
 
         foreach (Asset ass in SortedProducts1)
         {
@@ -162,28 +171,28 @@ class ProductList
             if (ass.PurchaseDate > oldDate)
             {
                 int differ = (int)difference.TotalDays;
-                if (differ < 90)          // if Purchase date is less than three months => colore Red
+                if (differ <= 90)          // if Purchase date is less than three months => colore Red
                 {
+                    
                     Console.ForegroundColor = ConsoleColor.Red;
 
                 }
-                else if (differ > 90 && differ < 180)    // if Purchase Date more than three months and less than 6 months => colore Yellow
+                else if (differ >= 90 && differ <= 180)    // if Purchase Date more than three months and less than 6 months => colore Yellow
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
-
+                    
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.White;      // other date with wihte color
-
+                   
                 }
             }
-            Console.WriteLine(ass.Type.PadRight(15) + ass.Brand.PadRight(15) + ass.Model.PadRight(15) + ass.PurchaseDate.ToString("yyyy-MM-dd").PadRight(15) + ass.Price.ToString().PadRight(15) + ass.Office.PadRight(15) + ass.LocalPrice.ToString().PadRight(15) + ass.Currency.PadRight(15));
+            Console.WriteLine(ass.Type.PadRight(15) + ass.Brand.PadRight(15) + ass.Model.PadRight(15) + ass.Office.PadRight(15) + ass.PurchaseDate.ToString("yyyy-MM-dd").PadRight(15) + ass.Price.ToString().PadRight(15) + ass.Currency.PadRight(15) + ass.LocalPrice.ToString().PadRight(15) );
             Console.ForegroundColor = ConsoleColor.White;
 
         }
     }
-
 
     }
 
